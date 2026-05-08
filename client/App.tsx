@@ -31,4 +31,8 @@ const App = () => (
   </QueryClientProvider>
 );
 
-createRoot(document.getElementById("root")!).render(<App />);
+export default App;
+
+if (typeof document !== "undefined") {
+  createRoot(document.getElementById("root")!).render(<App />);
+}
