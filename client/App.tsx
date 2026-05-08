@@ -1,7 +1,6 @@
 import "./global.css";
 
 import { Toaster } from "@/components/ui/toaster";
-import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -32,12 +31,3 @@ const App = () => (
 );
 
 export default App;
-
-if (typeof document !== "undefined") {
-  const container = document.getElementById("root");
-  if (container) {
-    const appRoot = (window as any).__reactRoot || createRoot(container);
-    (window as any).__reactRoot = appRoot;
-    appRoot.render(<App />);
-  }
-}
