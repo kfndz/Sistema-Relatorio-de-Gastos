@@ -2,14 +2,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
   id: string;
-  email: string;
-  name: string;
+  username: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string, name: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -32,15 +31,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string, name: string) => {
-    if (!email || !password || !name) {
-      throw new Error('Todos os campos são obrigatórios');
+  const login = async (username: string, password: string) => {
+    if (!username || !password) {
+      throw new Error('Usuário e senha são obrigatórios');
+    }
+
+    if (username.length < 3) {
+      throw new Error('Usuário deve ter pelo menos 3 caracteres');
+    }
+
+    if (password.length < 4) {
+      throw new Error('Senha deve ter pelo menos 4 caracteres');
     }
 
     const newUser: User = {
       id: Date.now().toString(),
-      email,
-      name,
+      username,
     };
 
     localStorage.setItem('user', JSON.stringify(newUser));

@@ -54,7 +54,7 @@ export default function Index() {
       category: category.charAt(0).toUpperCase() + category.slice(1),
       amount,
       date,
-      user: user?.name || 'Usuário',
+      user: user?.username || 'Usuário',
       description: text,
     };
   };

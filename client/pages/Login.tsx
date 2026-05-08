@@ -8,9 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -21,20 +19,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      if (isSignUp && !name) {
-        throw new Error('Nome é obrigatório para se cadastrar');
-      }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        throw new Error('Email inválido');
-      }
-
-      if (password.length < 4) {
-        throw new Error('Senha deve ter pelo menos 4 caracteres');
-      }
-
-      await login(email, password, name || email.split('@')[0]);
+      await login(username, password);
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login');
@@ -49,7 +34,7 @@ export default function Login() {
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-foreground">Gastos</h1>
           <p className="text-sm text-muted-foreground">
-            {isSignUp ? 'Crie sua conta' : 'Faça login na sua conta'}
+            Acesse sua conta
           </p>
         </div>
 
@@ -60,31 +45,17 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">
-                Nome
-              </label>
-              <Input
-                type="text"
-                placeholder="Seu nome"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-          )}
-
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground">
-              Email
+              Usuário
             </label>
             <Input
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="kaua"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               disabled={isLoading}
+              autoFocus
             />
           </div>
 
@@ -94,7 +65,7 @@ export default function Login() {
             </label>
             <Input
               type="password"
-              placeholder="Sua senha"
+              placeholder="1234"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
@@ -107,25 +78,9 @@ export default function Login() {
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
             size="lg"
           >
-            {isLoading ? 'Carregando...' : isSignUp ? 'Cadastrar' : 'Entrar'}
+            {isLoading ? 'Carregando...' : 'Entrar'}
           </Button>
         </form>
-
-        <button
-          type="button"
-          onClick={() => {
-            setIsSignUp(!isSignUp);
-            setError('');
-            setName('');
-            setEmail('');
-            setPassword('');
-          }}
-          className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          {isSignUp
-            ? 'Já tem uma conta? Faça login'
-            : 'Não tem uma conta? Cadastre-se'}
-        </button>
       </Card>
     </div>
   );
