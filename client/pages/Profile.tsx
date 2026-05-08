@@ -1,9 +1,17 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Profile() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -32,9 +40,9 @@ export default function Profile() {
               </div>
               <div className="text-center">
                 <h2 className="text-xl font-semibold text-foreground">
-                  Usuário
+                  {user?.name}
                 </h2>
-                <p className="text-sm text-muted-foreground">usuario@email.com</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </div>
           </Card>
@@ -46,7 +54,7 @@ export default function Profile() {
                 Nome
               </label>
               <div className="bg-muted/30 px-3 py-2 rounded-md text-foreground">
-                Usuário
+                {user?.name}
               </div>
             </div>
             <div>
@@ -54,7 +62,7 @@ export default function Profile() {
                 Email
               </label>
               <div className="bg-muted/30 px-3 py-2 rounded-md text-foreground">
-                usuario@email.com
+                {user?.email}
               </div>
             </div>
           </Card>
@@ -74,6 +82,7 @@ export default function Profile() {
 
           {/* Logout */}
           <Button
+            onClick={handleLogout}
             className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground gap-2"
             size="lg"
           >

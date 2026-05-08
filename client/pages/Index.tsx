@@ -1,9 +1,10 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { ChevronRight, TrendingDown, Calendar, User } from 'lucide-react';
+import { TrendingDown, Calendar, User, Trash2 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface Expense {
   id: string;
@@ -15,8 +16,24 @@ interface Expense {
 }
 
 export default function Index() {
+  const { user } = useAuth();
   const [input, setInput] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([]);
+
+  useEffect(() => {
+    const savedExpenses = localStorage.getItem('expenses');
+    if (savedExpenses) {
+      try {
+        setExpenses(JSON.parse(savedExpenses));
+      } catch {
+        localStorage.removeItem('expenses');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+  }, [expenses]);
 
   const parseExpense = (text: string) => {
     const amountMatch = text.match(/(\d+(?:[.,]\d+)?)/);
@@ -37,7 +54,7 @@ export default function Index() {
       category: category.charAt(0).toUpperCase() + category.slice(1),
       amount,
       date,
-      user: 'Você',
+      user: user?.name || 'Usuário',
       description: text,
     };
   };
@@ -53,6 +70,10 @@ export default function Index() {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
+  };
+
+  const handleDeleteExpense = (id: string) => {
+    setExpenses(expenses.filter(e => e.id !== id));
   };
 
   const todayExpenses = expenses
@@ -198,10 +219,17 @@ export default function Index() {
                         {formatDate(expense.date)}
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="flex flex-col items-end gap-3">
                       <p className="font-semibold text-lg text-foreground">
                         {formatCurrency(expense.amount)}
                       </p>
+                      <button
+                        onClick={() => handleDeleteExpense(expense.id)}
+                        className="text-destructive hover:text-destructive/80 transition-colors"
+                        title="Deletar gasto"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
                 </Card>
