@@ -1,79 +1,38 @@
-import { useState, FormEvent, ChangeEvent, useEffect } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { TrendingDown, Calendar, User, Trash2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-
-interface Expense {
-  id: string;
-  category: string;
-  amount: number;
-  date: string;
-  user: string;
-  description: string;
-}
+import { useExpenses, type Expense } from '@/hooks/useExpenses';
+import { parseExpense } from '@/utils/expenseParser';
 
 export default function Index() {
   const { user } = useAuth();
+  const { expenses, addExpense, deleteExpense } = useExpenses();
   const [input, setInput] = useState('');
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-
-  useEffect(() => {
-    const savedExpenses = localStorage.getItem('expenses');
-    if (savedExpenses) {
-      try {
-        setExpenses(JSON.parse(savedExpenses));
-      } catch {
-        localStorage.removeItem('expenses');
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('expenses', JSON.stringify(expenses));
-  }, [expenses]);
-
-  const parseExpense = (text: string) => {
-    const amountMatch = text.match(/(\d+(?:[.,]\d+)?)/);
-    const amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : 0;
-
-    let date = new Date().toISOString().split('T')[0];
-    if (text.toLowerCase().includes('ontem')) {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      date = yesterday.toISOString().split('T')[0];
-    }
-
-    const words = text.toLowerCase().split(/\s+/).filter(w => !['hoje', 'ontem', 'reais', 'r$'].includes(w));
-    const category = words[0] || 'Outro';
-
-    return {
-      id: Date.now().toString(),
-      category: category.charAt(0).toUpperCase() + category.slice(1),
-      amount,
-      date,
-      user: user?.username || 'Usuário',
-      description: text,
-    };
-  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const newExpense = parseExpense(input);
-    setExpenses([newExpense, ...expenses]);
+    const parsed = parseExpense(input);
+    const newExpense: Expense = {
+      id: Date.now().toString(),
+      category: parsed.category,
+      amount: parsed.amount,
+      date: parsed.date,
+      user: user?.username || 'Usuário',
+      description: parsed.description,
+    };
+
+    addExpense(newExpense);
     setInput('');
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
-  };
-
-  const handleDeleteExpense = (id: string) => {
-    setExpenses(expenses.filter(e => e.id !== id));
   };
 
   const todayExpenses = expenses
@@ -224,7 +183,7 @@ export default function Index() {
                         {formatCurrency(expense.amount)}
                       </p>
                       <button
-                        onClick={() => handleDeleteExpense(expense.id)}
+                        onClick={() => deleteExpense(expense.id)}
                         className="text-destructive hover:text-destructive/80 transition-colors"
                         title="Deletar gasto"
                       >
