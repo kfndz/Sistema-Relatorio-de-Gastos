@@ -40,11 +40,14 @@ export default function Reports() {
   }));
 
   // Gastos por dia (últimos 7 dias)
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (6 - i));
-    return date.toISOString().split('T')[0];
+const last7Days = Array.from({ length: 7 }, (_, i) => {
+  const date = new Date();
+  date.setDate(date.getDate() - (6 - i));
+
+  return date.toLocaleDateString('sv-SE', {
+    timeZone: 'America/Cuiaba',
   });
+});
 
   const dailyData = last7Days.map((date) => ({
     date: new Date(date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
