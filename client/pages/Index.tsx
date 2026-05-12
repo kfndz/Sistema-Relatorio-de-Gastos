@@ -52,13 +52,16 @@ const todayExpenses = expenses
     }).format(value);
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('pt-BR', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
+const formatDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+
+  const date = new Date(year, month - 1, day);
+
+  return date.toLocaleDateString('pt-BR', {
+    month: 'short',
+    day: 'numeric',
+  });
+};
 
   return (
     <div className="min-h-screen bg-background pb-20">
