@@ -35,9 +35,13 @@ export default function Index() {
     setInput(e.target.value);
   };
 
-  const todayExpenses = expenses
-    .filter(e => e.date === new Date().toISOString().split('T')[0])
-    .reduce((sum, e) => sum + e.amount, 0);
+const today = new Date().toLocaleDateString('sv-SE', {
+  timeZone: 'America/Cuiaba',
+});
+
+const todayExpenses = expenses
+  .filter(e => e.date === today)
+  .reduce((sum, e) => sum + e.amount, 0);
 
   const monthExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
