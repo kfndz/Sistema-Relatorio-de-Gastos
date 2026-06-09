@@ -251,7 +251,7 @@ export const CATEGORY_KEYWORDS: Record<string, string[]> = {
   ],
 
   'Pix / Transferência': [
-    'pix',
+    'pix', 'transferência', 'transferencia', 'cota', 'Cota', 'Pix',
     'transferencia',
     'transferência',
     'mãe', 'pai',
@@ -280,11 +280,18 @@ export const CATEGORY_KEYWORDS: Record<string, string[]> = {
 export const detectCategory = (text: string): string => {
   const lowerText = text.toLowerCase();
 
-  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    for (const keyword of keywords) {
-      if (lowerText.includes(keyword)) {
-        return category;
-      }
+  const entries = Object.entries(CATEGORY_KEYWORDS)
+    .flatMap(([category, keywords]) =>
+      keywords.map(keyword => ({
+        category,
+        keyword,
+      }))
+    )
+    .sort((a, b) => b.keyword.length - a.keyword.length);
+
+  for (const item of entries) {
+    if (lowerText.includes(item.keyword)) {
+      return item.category;
     }
   }
 
@@ -292,22 +299,98 @@ export const detectCategory = (text: string): string => {
 };
 
 export const parseExpense = (text: string) => {
-  const amountMatch = text.match(/(\d+(?:[.,]\d+)?)/);
-  const amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : 0;
+  const lowerText = text.toLowerCase();
 
-  const formatLocalDate = (date: Date) => {
-    return date.toLocaleDateString('sv-SE', {
-      timeZone: 'America/Cuiaba',
+  const formatLocalDate = (date: Date) =>
+    date.toLocaleDateString("sv-SE", {
+      timeZone: "America/Cuiaba",
     });
-  };
 
   let date = formatLocalDate(new Date());
 
-  if (text.toLowerCase().includes('ontem')) {
+  let cleanText = lowerText;
+
+  // ontem
+  if (lowerText.includes("ontem")) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
+
     date = formatLocalDate(yesterday);
+
+    cleanText = cleanText.replace("ontem", "");
   }
+
+  // 30/05 ou 30/05/2025
+  const slashDateMatch = lowerText.match(
+    /(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/
+  );
+
+  if (slashDateMatch) {
+    const day = Number(slashDateMatch[1]);
+    const month = Number(slashDateMatch[2]);
+
+    let year = Number(slashDateMatch[3]);
+
+    if (!year) {
+      year = new Date().getFullYear();
+    }
+
+    if (year < 100) {
+      year += 2000;
+    }
+
+    const customDate = new Date(year, month - 1, day);
+
+    if (!isNaN(customDate.getTime())) {
+      date = formatLocalDate(customDate);
+    }
+
+    cleanText = cleanText.replace(slashDateMatch[0], "");
+  }
+
+  // 30 de maio
+  const months: Record<string, number> = {
+    janeiro: 1,
+    fevereiro: 2,
+    março: 3,
+    marco: 3,
+    abril: 4,
+    maio: 5,
+    junho: 6,
+    julho: 7,
+    agosto: 8,
+    setembro: 9,
+    outubro: 10,
+    novembro: 11,
+    dezembro: 12,
+  };
+
+  const textDateMatch = lowerText.match(
+    /(\d{1,2})\s+de\s+(janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)/
+  );
+
+  if (textDateMatch) {
+    const day = Number(textDateMatch[1]);
+
+    const month = months[textDateMatch[2]];
+
+    const year = new Date().getFullYear();
+
+    const customDate = new Date(year, month - 1, day);
+
+    if (!isNaN(customDate.getTime())) {
+      date = formatLocalDate(customDate);
+    }
+
+    cleanText = cleanText.replace(textDateMatch[0], "");
+  }
+
+  // pega primeiro valor monetário
+  const amountMatch = cleanText.match(/\d+(?:[.,]\d+)?/);
+
+  const amount = amountMatch
+    ? parseFloat(amountMatch[0].replace(",", "."))
+    : 0;
 
   const category = detectCategory(text);
 

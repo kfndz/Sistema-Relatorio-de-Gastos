@@ -1,17 +1,31 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { TrendingDown, Calendar, User, Trash2 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useExpenses, type Expense } from '@/hooks/useExpenses';
-import { parseExpense } from '@/utils/expenseParser';
+import { useState, FormEvent, ChangeEvent } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { TrendingDown, Calendar, User, Trash2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { useExpenses, type Expense } from "@/hooks/useExpenses";
+import { parseExpense, detectCategory } from "@/utils/expenseParser";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export default function Index() {
   const { user } = useAuth();
-  const { expenses, addExpense, deleteExpense } = useExpenses();
-  const [input, setInput] = useState('');
+  const { expenses, addExpense, deleteExpense, updateExpense } = useExpenses();
+  const [input, setInput] = useState("");
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+
+  const [editDescription, setEditDescription] = useState("");
+
+  const [editAmount, setEditAmount] = useState("");
+
+  const [editDate, setEditDate] = useState("");
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,45 +37,58 @@ export default function Index() {
       category: parsed.category,
       amount: parsed.amount,
       date: parsed.date,
-      user: user?.username || 'Usuário',
+      user: user?.username || "Usuário",
       description: parsed.description,
     };
 
     addExpense(newExpense);
-    setInput('');
+    setInput("");
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
-const today = new Date().toLocaleDateString('sv-SE', {
-  timeZone: 'America/Cuiaba',
-});
+  const today = new Date().toLocaleDateString("sv-SE", {
+    timeZone: "America/Cuiaba",
+  });
 
-const todayExpenses = expenses
-  .filter(e => e.date === today)
-  .reduce((sum, e) => sum + e.amount, 0);
+  const todayExpenses = expenses
+    .filter((e) => e.date === today)
+    .reduce((sum, e) => sum + e.amount, 0);
 
-  const monthExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const now = new Date();
+
+  const monthExpenses = expenses
+    .filter((expense) => {
+      const [year, month] = expense.date.split("-").map(Number);
+
+      return year === now.getFullYear() && month === now.getMonth() + 1;
+    })
+    .reduce((sum, expense) => sum + expense.amount, 0);
+
+  const totalExpenses = expenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0,
+  );
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
-const formatDate = (dateStr: string) => {
-  const [year, month, day] = dateStr.split('-').map(Number);
+  const formatDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split("-").map(Number);
 
-  const date = new Date(year, month - 1, day);
+    const date = new Date(year, month - 1, day);
 
-  return date.toLocaleDateString('pt-BR', {
-    month: 'short',
-    day: 'numeric',
-  });
-};
+    return date.toLocaleDateString("pt-BR", {
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -140,7 +167,7 @@ const formatDate = (dateStr: string) => {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total</p>
               <p className="text-2xl font-bold text-accent">
-                {formatCurrency(monthExpenses)}
+                {formatCurrency(totalExpenses)}
               </p>
             </div>
           </Card>
@@ -165,7 +192,13 @@ const formatDate = (dateStr: string) => {
               {expenses.map((expense) => (
                 <Card
                   key={expense.id}
-                  className="border-border bg-card p-4 transition-colors hover:bg-muted/30"
+                  onClick={() => {
+                    setEditingExpense(expense);
+                    setEditDescription(expense.description);
+                    setEditAmount(expense.amount.toString());
+                    setEditDate(expense.date);
+                  }}
+                  className="border-border bg-card p-4 transition-colors hover:bg-muted/30 cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1 space-y-1">
@@ -190,7 +223,10 @@ const formatDate = (dateStr: string) => {
                         {formatCurrency(expense.amount)}
                       </p>
                       <button
-                        onClick={() => deleteExpense(expense.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteExpense(expense.id);
+                        }}
                         className="text-destructive hover:text-destructive/80 transition-colors"
                         title="Deletar gasto"
                       >
@@ -203,6 +239,68 @@ const formatDate = (dateStr: string) => {
             </div>
           )}
         </div>
+
+        <Dialog
+          open={!!editingExpense}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingExpense(null);
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar gasto</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <Input
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Descrição"
+              />
+
+              <Input
+                type="number"
+                value={editAmount}
+                onChange={(e) => setEditAmount(e.target.value)}
+                placeholder="Valor"
+              />
+
+              <Input
+                type="date"
+                value={editDate}
+                onChange={(e) => setEditDate(e.target.value)}
+              />
+
+              <Button
+                className="w-full"
+                onClick={() => {
+                  if (!editingExpense) return;
+
+                  const amount = Number(editAmount);
+
+                  if (isNaN(amount) || amount <= 0) {
+                    alert("Informe um valor válido");
+                    return;
+                  }
+
+                  updateExpense({
+                    ...editingExpense,
+                    description: editDescription,
+                    amount,
+                    date: editDate,
+                    category: detectCategory(editDescription),
+                  });
+
+                  setEditingExpense(null);
+                }}
+              >
+                Salvar alterações
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

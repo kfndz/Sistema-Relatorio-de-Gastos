@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const newUser: User = {
-      id: Date.now().toString(),
+      id: username.toLowerCase(),
       username,
     };
 

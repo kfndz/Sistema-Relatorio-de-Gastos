@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
 export interface Expense {
   id: string;
@@ -9,22 +10,37 @@ export interface Expense {
   description: string;
 }
 
-const STORAGE_KEY = 'expenses';
-
 export const useExpenses = () => {
+  const { user } = useAuth();
+
+  const STORAGE_KEY = user
+    ? `expenses_${user.id}`
+    : 'expenses_guest';
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+      setExpenses([]);
+      setIsLoading(false);
+      return;
+    }
+
     const loadExpenses = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
+
       if (saved) {
         try {
           setExpenses(JSON.parse(saved));
         } catch {
           localStorage.removeItem(STORAGE_KEY);
+          setExpenses([]);
         }
+      } else {
+        setExpenses([]);
       }
+
       setIsLoading(false);
     };
 
@@ -41,29 +57,71 @@ export const useExpenses = () => {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
 
-  const addExpense = useCallback((expense: Expense) => {
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [STORAGE_KEY, user]);
+
+  const addExpense = useCallback(
+    (expense: Expense) => {
+      setExpenses((prev) => {
+        const updated = [expense, ...prev];
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(updated)
+        );
+
+        return updated;
+      });
+    },
+    [STORAGE_KEY]
+  );
+
+  const deleteExpense = useCallback(
+    (id: string) => {
+      setExpenses((prev) => {
+        const updated = prev.filter(
+          (expense) => expense.id !== id
+        );
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(updated)
+        );
+
+        return updated;
+      });
+    },
+    [STORAGE_KEY]
+  );
+
+  const updateExpense = useCallback(
+  (updatedExpense: Expense) => {
     setExpenses((prev) => {
-      const updated = [expense, ...prev];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      const updated = prev.map((expense) =>
+        expense.id === updatedExpense.id
+          ? updatedExpense
+          : expense
+      );
+
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(updated)
+      );
+
       return updated;
     });
-  }, []);
-
-  const deleteExpense = useCallback((id: string) => {
-    setExpenses((prev) => {
-      const updated = prev.filter((e) => e.id !== id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
+  },
+  [STORAGE_KEY]
+);
 
   return {
     expenses,
     isLoading,
     addExpense,
     deleteExpense,
+    updateExpense,
   };
 };
