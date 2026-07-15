@@ -1,85 +1,78 @@
-# 💸 Sistema de Controle de Gastos Familiares
+# 💸 Family Expense Tracker
 
-Aplicação web desenvolvida para facilitar o registro e o gerenciamento de gastos familiares através de uma interface simples, rápida e intuitiva.
+A modern web application for tracking family expenses through a simple, fast, and intuitive interface.
 
-O diferencial do projeto é permitir que o usuário registre despesas utilizando linguagem natural, tornando o processo muito mais ágil do que formulários tradicionais.
+The main feature of this project is its ability to register expenses using natural language, making the process much faster than traditional forms.
 
-## 🚀 Acesse o projeto
+## 🚀 Live Demo
 
-🔗 **Deploy:** https://sistema-relatorio-de-gastos.vercel.app
+🌐 **Website:** https://sistema-relatorio-de-gastos.vercel.app
 
----
+## 📖 About
 
-## 📌 Sobre o projeto
+This project was created to simplify the process of recording daily family expenses.
 
-O Sistema de Controle de Gastos Familiares foi criado com o objetivo de simplificar o registro de despesas do dia a dia.
+Instead of filling out multiple form fields, users can simply type a short sentence, and the application automatically extracts the relevant information to register an expense.
 
-Em vez de preencher diversos campos manualmente, o usuário pode apenas escrever uma frase simples, como faria em uma conversa.
-
-### Exemplos
+### Examples
 
 ```text
-uber 27 hoje
-cinema 39 reais
-mercado ontem 150
-farmácia 52
+uber 27 today
+movie theater 39
+groceries yesterday 150
+pharmacy 52
 ```
 
-O sistema interpreta automaticamente as informações e registra o gasto correspondente.
+> **Note:** The application currently supports **Portuguese natural language input**.
 
----
+## ✨ Features
 
-## ✨ Funcionalidades
+* 💬 Natural language expense input
+* ⚡ Quick expense registration
+* 📱 Responsive interface
+* 🎨 Clean and intuitive user experience
+* ☁️ Deployed on Vercel
 
-* Registro rápido de despesas
-* Entrada utilizando linguagem natural
-* Organização dos gastos
-* Interface moderna e responsiva
-* Experiência simples e intuitiva
-* Aplicação hospedada na Vercel
+## 🛠️ Tech Stack
 
----
-
-## 🛠️ Tecnologias utilizadas
-
-* TypeScript
 * React
-* CSS
+* TypeScript
 * Vite
+* CSS
 * Lucide React
-  
----
 
-## ⚙️ Executando localmente
+## ⚙️ Getting Started
+
+Clone the repository:
 
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/seu-repositorio.git
+git clone https://github.com/kfndz/Sistema-Relatorio-de-Gastos.git
+```
 
-# Entre na pasta
-cd seu-repositorio
+Navigate to the project directory:
 
-# Instale as dependências
+```bash
+cd Sistema-Relatorio-de-Gastos
+```
+
+Install dependencies:
+
+```bash
 npm install
+```
 
-# Execute o projeto
+Start the development server:
+
+```bash
 npm run dev
 ```
 
----
+## 🎯 Purpose
 
-## 💡 Objetivo
+This project was built to explore modern front-end development practices while creating a practical solution for managing family expenses.
 
-Este projeto foi desenvolvido para demonstrar a criação de uma aplicação web focada em usabilidade, oferecendo uma experiência prática para o controle de gastos familiares.
+It also serves as a portfolio project showcasing React, TypeScript, and Vite.
 
-Além da utilidade no dia a dia, o projeto também faz parte do meu portfólio como desenvolvedor.
+## 📄 License
 
----
-
-## 📄 Licença
-
-Este projeto está disponível para uso próprio, familiar, fins de estudo e portfólio.
-
-
-
----
+This project is available for personal, educational, and portfolio purposes.
