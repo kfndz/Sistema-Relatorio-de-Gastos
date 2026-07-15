@@ -42,13 +42,30 @@ O sistema interpreta automaticamente as informações e registra o gasto corresp
 
 ## 🛠️ Tecnologias utilizadas
 
-* HTML5
-* CSS3
-* JavaScript
-* Typescript
+* TypeScript
+* React
+* CSS
 * Vite
-* Vercel
-* 
+* Lucide React
+  
+---
+
+## ⚙️ Executando localmente
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/seu-repositorio.git
+
+# Entre na pasta
+cd seu-repositorio
+
+# Instale as dependências
+npm install
+
+# Execute o projeto
+npm run dev
+```
+
 ---
 
 ## 💡 Objetivo
@@ -62,3 +79,7 @@ Além da utilidade no dia a dia, o projeto também faz parte do meu portfólio c
 ## 📄 Licença
 
 Este projeto está disponível para uso próprio, familiar, fins de estudo e portfólio.
+
+
+
+---
